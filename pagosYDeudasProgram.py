@@ -5,8 +5,8 @@ import os
 
 root = tk.Tk()
 
-# Set the size of the window to 400x400 pixels
-root.geometry("400x600")
+# Set the size of the window to 400x700 pixels
+root.geometry("400x700")
 
 # Create a label to prompt the user to select a user
 user_label = tk.Label(root, text="Select a user:")
@@ -34,6 +34,10 @@ user_menu.pack()
 # Create a label to display the balance of the selected user
 balance_label = tk.Label(root)
 balance_label.pack()
+
+# show balance
+balance_text = "\n".join([f"{name}: {balance.get()}" for (name, _), balance in zip(users, balances)])
+balance_label.config(text=balance_text)
 
 # Create a button to add a new user
 def add_user():
@@ -80,14 +84,6 @@ add_user_button.pack()
 delete_user_button = tk.Button(root, text="Delete user", command=lambda: delete_user(selected_user.get()))
 delete_user_button.pack()
 
-# Create a label to prompt the user to enter a balance to add
-value_label = tk.Label(root, text="Enter an balance to add:")
-value_label.pack()
-
-# Create an entry widget for the user to input a value
-value_entry = tk.Entry(root)
-value_entry.pack()
-
 # Create a label to display the result of the operation
 result_label = tk.Label(root)
 result_label.pack()
@@ -97,48 +93,6 @@ def save_to_json():
     with open("users.json", "w") as f:
         json.dump(users, f)
         
-# Function to handle button click
-def on_click():
-    # Get the selected user
-    selected_user_name = selected_user.get()
-    
-    # Get the value entered by the user
-    value = value_entry.get()
-    
-    try:
-        # Convert the value to an integer
-        value = int(value)
-        
-        # Find the index of the selected user in the list of users
-        user_index = [name for name, _ in users].index(selected_user_name)
-        
-        # Update the balance for the selected user
-        
-        balances[user_index].set(balances[user_index].get() + value)
-        
-        # Display the updated balance of the selected user
-        balance_label.config(text=f"{selected_user_name}'s balance: {balances[user_index].get()}")
-
-        # uptade the balance
-        users[user_index][1]=balances[user_index].get()
-
-        # Display a message to the user indicating the value was added to the user's balance
-        message = f"Value {value} added to {selected_user_name}'s balance"
-
-        save_to_json()
-    except ValueError:
-        # If the user entered a non-integer value, display an error message
-        message = "Invalid input. Please enter an integer."
-    
-    # Replace the current result label with a new label containing the updated message
-    global result_label
-    result_label.destroy()
-    result_label = tk.Label(root, text=message)
-    result_label.pack()
-
-# Create a button to trigger the on_click function
-button = tk.Button(root, text="Add value", command=on_click)
-button.pack()
 
 # Create a label to prompt the user to enter a value
 pay_label = tk.Label(root, text="Enter the amount to be paid:")
@@ -196,6 +150,59 @@ def on_pay():
 # create a button to trigger the on_pay function
 pay_button = tk.Button(root, text="Pay", command=on_pay)
 pay_button.pack()
+
+# Create a label to prompt the user to enter a value
+pay_label_to_user = tk.Label(root, text="Enter the amount to be paid the other user:")
+pay_label_to_user.pack()
+
+# Create an entry widget for the user to input a value
+pay_entry_to_user = tk.Entry(root)
+pay_entry_to_user.pack()
+
+# Create a label to prompt the user to enter a value
+select_user_to_pay = tk.Label(root, text="Select the user to be paid:")
+select_user_to_pay.pack()
+
+# Create an OptionMenu widget to select a user to be paid
+
+selected_pay_user = tk.StringVar(root)
+pay_user_menu = tk.OptionMenu(root, selected_pay_user, *tuple(name for name, _ in users))
+pay_user_menu.pack()
+
+# create a function to handle button pay to user
+
+def pay_to_user():
+    # Get the amount to be paid from the user
+    amount = pay_entry_to_user.get()
+    
+    try:
+        # Convert the amount to an integer
+        amount = int(amount)
+        
+        # Find the index of the current user in the list of users
+        current_user_index = [name for name, _ in users].index(selected_user.get())
+        
+        # Find the index of the selected user in the list of users
+        selected_user_index = [name for name, _ in users].index(selected_pay_user.get())
+        
+        # Update the balances for the current user and the selected user
+        balances[current_user_index].set(balances[current_user_index].get() + amount)
+        balances[selected_user_index].set(balances[selected_user_index].get() - amount)
+        # Display the updated balances of all users
+        balance_text = "\n".join([f"{name}: {balance.get()}" for (name, _), balance in zip(users, balances)])
+        balance_label.config(text=balance_text)
+
+        #save the uptaded balance
+        save_to_json()
+
+    except ValueError:
+        # If the user entered a non-integer value, display an error message
+        message = "Invalid input. Please enter an integer."
+
+# Create a button to trigger the pay_to_user function
+
+pay_to_user_button = tk.Button(root, text="Pay to user", command=pay_to_user)
+pay_to_user_button.pack()
 
 # Center all the widgets
 for widget in root.winfo_children():
