@@ -70,7 +70,6 @@ def add_user():
 
         
 # funtion to delete a user
-
 def delete_user(user_name):
     # Find the index of the user to delete
     user_index = [name for name, _ in users].index(user_name)
@@ -216,7 +215,6 @@ pay_user_menu = tk.OptionMenu(root, selected_pay_user, *tuple(name for name, _ i
 pay_user_menu.pack()
 
 # create a function to handle button pay to user
-
 def pay_to_user():
     # Get the amount to be paid from the user
     amount = pay_entry_to_user.get()
